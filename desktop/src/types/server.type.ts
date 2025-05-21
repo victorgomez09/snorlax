@@ -1,5 +1,5 @@
 export interface ServerType {
   id: number;
-  connection: string;
+  url: string;
   name: string;
 }

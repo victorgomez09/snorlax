@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { ReactComponent } from '@/types/react.type';
-import { FileType } from '@/types/file.type';
-import { renameFile } from '@/api/file.api';
-import { showToast } from '@/utils/showToast';
-import { useFilesStore } from '@/store/files.store';
-import { useServerStore } from '@/store/server.store';
-import { useFilePageStore } from '@/store/filepage.store';
+import { useEffect, useState } from "react";
+import { ReactComponent } from "@/types/react.type";
+import { FileType } from "@/types/file.type";
+import { renameFile } from "@/api/file.api";
+import { showToast } from "@/utils/showToast";
+import { useFilesStore } from "@/store/files.store";
+import { useServerStore } from "@/store/server.store";
+import { useFilePageStore } from "@/store/filepage.store";
 import {
   Button,
   Input,
@@ -17,7 +17,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
 interface Props {
   selectedFile: FileType;
@@ -59,16 +59,16 @@ export const RenameWrapper: ReactComponent<Props> = ({
 
     if (!selectedServer) return;
 
-    renameFile(selectedServer.connection, {
+    renameFile(selectedServer.url, {
       oldPath: `${path}/${selectedFile.name}`,
       newPath: `${path}/${fileName}`,
     })
       .then(() => {
         showToast({
           title: `Renamed ${
-            selectedFile.isDir ? 'folder' : 'file'
+            selectedFile.isDir ? "folder" : "file"
           } successfully`,
-          status: 'success',
+          status: "success",
         });
         renameStoreFile(selectedFile.name, fileName);
         onClose(fileName);
@@ -79,9 +79,9 @@ export const RenameWrapper: ReactComponent<Props> = ({
       })
       .catch((err) => {
         showToast({
-          title: `Failed to rename ${selectedFile.isDir ? 'folder' : 'file'}`,
+          title: `Failed to rename ${selectedFile.isDir ? "folder" : "file"}`,
           description: err?.response?.data?.message || err?.message,
-          status: 'error',
+          status: "error",
           duration: 5000,
         });
         onClose();
@@ -99,28 +99,28 @@ export const RenameWrapper: ReactComponent<Props> = ({
         closeOnOverlayClick={false}
       >
         <ModalOverlay />
-        <ModalContent className='bg-app-dark3'>
+        <ModalContent className="bg-app-dark3">
           <ModalHeader>Rename file</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Input
-              variant='filled'
-              placeholder='File name'
+              variant="filled"
+              placeholder="File name"
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
               autoFocus
             />
             {isThereDuplicate && (
-              <p className='mt-2 text-rose-300'>
-                {selectedFile.isDir ? 'Folder' : 'File'} already exists, change{' '}
-                {selectedFile.isDir ? 'folder name' : 'filename'}
+              <p className="mt-2 text-rose-300">
+                {selectedFile.isDir ? "Folder" : "File"} already exists, change{" "}
+                {selectedFile.isDir ? "folder name" : "filename"}
               </p>
             )}
           </ModalBody>
           <ModalFooter>
             <Button
               disabled={loading}
-              variant='outline'
+              variant="outline"
               mr={2}
               onClick={() => onClose()}
             >
@@ -135,9 +135,9 @@ export const RenameWrapper: ReactComponent<Props> = ({
               }
               isLoading={loading}
               onClick={renameFileHandler}
-              className='bg-app-accent transition-all duration-200 hover:bg-app-accent/80'
+              className="bg-app-accent transition-all duration-200 hover:bg-app-accent/80"
             >
-              Rename {selectedFile.isDir ? 'folder' : 'file'}
+              Rename {selectedFile.isDir ? "folder" : "file"}
             </Button>
           </ModalFooter>
         </ModalContent>

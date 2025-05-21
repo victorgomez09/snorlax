@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { ReactComponent } from '@/types/react.type';
-import { createFolder } from '@/api/file.api';
-import { showToast } from '@/utils/showToast';
-import { useFilesStore } from '@/store/files.store';
-import { useServerStore } from '@/store/server.store';
-import { useFilePageStore } from '@/store/filepage.store';
+import { useEffect, useState } from "react";
+import { ReactComponent } from "@/types/react.type";
+import { createFolder } from "@/api/file.api";
+import { showToast } from "@/utils/showToast";
+import { useFilesStore } from "@/store/files.store";
+import { useServerStore } from "@/store/server.store";
+import { useFilePageStore } from "@/store/filepage.store";
 import {
   Button,
   Input,
@@ -16,7 +16,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
 interface Props {
   afterCreate?: () => void;
@@ -32,12 +32,12 @@ export const CreateFolderWrapper: ReactComponent<Props> = ({
   const { selectedServer } = useServerStore();
   const { path, setPath } = useFilePageStore();
 
-  const [folderName, setFolderName] = useState('');
+  const [folderName, setFolderName] = useState("");
   const [loading, setLoading] = useState(false);
   const [isThereDuplicate, setIsThereDuplicate] = useState(false);
 
   const onClose = () => {
-    setFolderName('');
+    setFolderName("");
     closeModal();
   };
 
@@ -46,17 +46,17 @@ export const CreateFolderWrapper: ReactComponent<Props> = ({
 
     if (!selectedServer) return;
 
-    createFolder(selectedServer.connection, path, folderName)
+    createFolder(selectedServer.url, path, folderName)
       .then(() => {
         showToast({
-          title: 'Created folder successfully',
-          status: 'success',
+          title: "Created folder successfully",
+          status: "success",
         });
         addFile({
           name: folderName,
           isDir: true,
         });
-        setPath(path + `${path === '/' ? '' : '/'}` + folderName);
+        setPath(path + `${path === "/" ? "" : "/"}` + folderName);
         onClose();
 
         if (afterCreate) {
@@ -65,9 +65,9 @@ export const CreateFolderWrapper: ReactComponent<Props> = ({
       })
       .catch((err) => {
         showToast({
-          title: 'Failed to create folder',
+          title: "Failed to create folder",
           description: err?.response?.data?.message || err?.message,
-          status: 'error',
+          status: "error",
           duration: 5000,
         });
         onClose();
@@ -90,19 +90,19 @@ export const CreateFolderWrapper: ReactComponent<Props> = ({
         closeOnOverlayClick={false}
       >
         <ModalOverlay />
-        <ModalContent className='bg-app-dark3'>
+        <ModalContent className="bg-app-dark3">
           <ModalHeader>Create folder</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Input
-              variant='filled'
-              placeholder='Folder name'
+              variant="filled"
+              placeholder="Folder name"
               value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
               autoFocus
             />
             {isThereDuplicate && (
-              <p className='my-2 text-rose-300'>
+              <p className="my-2 text-rose-300">
                 File already exists, change foldername
               </p>
             )}
@@ -110,7 +110,7 @@ export const CreateFolderWrapper: ReactComponent<Props> = ({
           <ModalFooter>
             <Button
               disabled={loading}
-              variant='outline'
+              variant="outline"
               mr={2}
               onClick={() => onClose()}
             >
@@ -122,7 +122,7 @@ export const CreateFolderWrapper: ReactComponent<Props> = ({
               }
               isLoading={loading}
               onClick={createFolderHandler}
-              className='bg-app-accent transition-all duration-200 hover:bg-app-accent/80'
+              className="bg-app-accent transition-all duration-200 hover:bg-app-accent/80"
             >
               Create folder
             </Button>

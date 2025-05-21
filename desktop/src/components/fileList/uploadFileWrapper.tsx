@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { ReactComponent } from '@/types/react.type';
-import { showToast } from '@/utils/showToast';
-import { useFilesStore } from '@/store/files.store';
-import { useServerStore } from '@/store/server.store';
-import { useFilePageStore } from '@/store/filepage.store';
-import { uploadFile } from '@/api/file.api';
+import React, { useEffect, useState } from "react";
+import { ReactComponent } from "@/types/react.type";
+import { showToast } from "@/utils/showToast";
+import { useFilesStore } from "@/store/files.store";
+import { useServerStore } from "@/store/server.store";
+import { useFilePageStore } from "@/store/filepage.store";
+import { uploadFile } from "@/api/file.api";
 import {
   Button,
   Input,
@@ -17,7 +17,7 @@ import {
   ModalOverlay,
   Progress,
   useDisclosure,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
 export const UploadFileWrapper: ReactComponent = ({ children }) => {
   const { isOpen, onOpen, onClose: closeModal } = useDisclosure();
@@ -28,7 +28,7 @@ export const UploadFileWrapper: ReactComponent = ({ children }) => {
 
   const imageInputRef = React.useRef<any>();
 
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isThereDuplicate, setIsThereDuplicate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ export const UploadFileWrapper: ReactComponent = ({ children }) => {
 
   const onClose = () => {
     setFile(null);
-    setFileName('');
+    setFileName("");
     setIsThereDuplicate(false);
     setProgress(0);
     setLoading(false);
@@ -48,24 +48,18 @@ export const UploadFileWrapper: ReactComponent = ({ children }) => {
 
     if (!selectedServer || !file) return;
 
-    uploadFile(
-      selectedServer.connection,
-      path,
-      file,
-      fileName,
-      (progressEvent) => {
-        const { loaded, total } = progressEvent;
-        if (!total) return;
-        let percent = Math.floor((loaded * 100) / total);
-        if (percent < 100) {
-          setProgress(percent);
-        }
+    uploadFile(selectedServer.url, path, file, fileName, (progressEvent) => {
+      const { loaded, total } = progressEvent;
+      if (!total) return;
+      let percent = Math.floor((loaded * 100) / total);
+      if (percent < 100) {
+        setProgress(percent);
       }
-    )
+    })
       .then(() => {
         showToast({
-          title: 'Uploaded file successfully',
-          status: 'success',
+          title: "Uploaded file successfully",
+          status: "success",
         });
         addFile({
           name: fileName,
@@ -75,9 +69,9 @@ export const UploadFileWrapper: ReactComponent = ({ children }) => {
       })
       .catch((err) => {
         showToast({
-          title: 'Failed to upload file',
+          title: "Failed to upload file",
           description: err?.response?.data?.message || err?.message,
-          status: 'error',
+          status: "error",
           duration: 5000,
         });
         onClose();
@@ -100,38 +94,38 @@ export const UploadFileWrapper: ReactComponent = ({ children }) => {
         closeOnOverlayClick={false}
       >
         <ModalOverlay />
-        <ModalContent className='bg-app-dark3'>
+        <ModalContent className="bg-app-dark3">
           <ModalHeader>Upload file</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {file && (
               <Input
-                variant='filled'
-                placeholder='File name'
+                variant="filled"
+                placeholder="File name"
                 value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
                 disabled={loading}
               />
             )}
             {isThereDuplicate && (
-              <p className='my-2 text-rose-300'>
+              <p className="my-2 text-rose-300">
                 File already exists, change filename
               </p>
             )}
             <Button
               mt={file ? 2 : 0}
-              w='full'
-              className='bg-app-dark4 transition-all duration-200 hover:bg-app-dark4/60'
+              w="full"
+              className="bg-app-dark4 transition-all duration-200 hover:bg-app-dark4/60"
               onClick={() => imageInputRef.current.click()}
               disabled={loading}
             >
-              {file?.name ? 'Change file' : 'Select a file'}
+              {file?.name ? "Change file" : "Select a file"}
             </Button>
 
             <input
-              type='file'
+              type="file"
               ref={imageInputRef}
-              className='hidden'
+              className="hidden"
               onChange={(e) => {
                 if (!e.target.files || e.target.files.length === 0) {
                   setFile(null);
@@ -146,22 +140,22 @@ export const UploadFileWrapper: ReactComponent = ({ children }) => {
             {progress !== 0 && (
               <Progress
                 value={progress}
-                size='xs'
+                size="xs"
                 mt={5}
-                className='rounded-full'
-                color='#5993E2'
+                className="rounded-full"
+                color="#5993E2"
               />
             )}
           </ModalBody>
           <ModalFooter>
-            <Button variant='outline' mr={2} onClick={() => onClose()}>
+            <Button variant="outline" mr={2} onClick={() => onClose()}>
               Cancel
             </Button>
             <Button
               disabled={loading || file == null || isThereDuplicate}
               isLoading={loading}
               onClick={handleFileUpload}
-              className='bg-app-accent transition-all duration-200 hover:bg-app-accent/80'
+              className="bg-app-accent transition-all duration-200 hover:bg-app-accent/80"
             >
               Upload file
             </Button>

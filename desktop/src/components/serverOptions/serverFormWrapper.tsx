@@ -1,11 +1,10 @@
-import validURl from 'valid-url';
-import { useEffect, useState } from 'react';
-import { ReactComponent } from '@/types/react.type';
-import { ServerType } from '@/types/server.type';
-import { invoke } from '@tauri-apps/api';
-import { showToast } from '@/utils/showToast';
-import { useServerStore } from '@/store/server.store';
-import { useFilePageStore } from '@/store/filepage.store';
+import validURl from "valid-url";
+import { useEffect, useState } from "react";
+import { ReactComponent } from "@/types/react.type";
+import { ServerType } from "@/types/server.type";
+import { showToast } from "@/utils/showToast";
+import { useServerStore } from "@/store/server.store";
+import { useFilePageStore } from "@/store/filepage.store";
 import {
   Button,
   Flex,
@@ -24,7 +23,12 @@ import {
   TabPanels,
   Tabs,
   useDisclosure,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
+import {
+  createDestination,
+  getDestinationByName,
+  updateDestination,
+} from "@/api/destination.api";
 
 interface Props {
   server?: ServerType;
@@ -33,19 +37,19 @@ interface Props {
 export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
   const { isOpen, onOpen, onClose: closeModal } = useDisclosure();
 
-  const { loadServers } = useServerStore();
+  const { loadServers, setSelectedServer } = useServerStore();
   const { setPath } = useFilePageStore();
 
   const [loading, setLoading] = useState(false);
-  const [connection, setConnection] = useState('');
-  const [serverName, setServerName] = useState('');
+  const [connection, setConnection] = useState("");
+  const [serverName, setServerName] = useState("");
 
   const [idx, setIdx] = useState(0);
-  const [serverURL, setServerURL] = useState('');
-  const [serverIP, setServerIP] = useState('');
-  const [serverPort, setServerPort] = useState('');
-  const [serverProtocol, setServerProtocol] = useState<'http' | 'https'>(
-    'http'
+  const [serverURL, setServerURL] = useState("");
+  const [serverIP, setServerIP] = useState("");
+  const [serverPort, setServerPort] = useState("");
+  const [serverProtocol, setServerProtocol] = useState<"http" | "https">(
+    "http"
   );
 
   useEffect(() => {
@@ -53,7 +57,7 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
       setConnection(serverURL);
     } else {
       if (serverIP.trim().length == 0 || serverPort.trim().length == 0) {
-        setConnection('');
+        setConnection("");
         return;
       }
       setConnection(`${serverProtocol}://${serverIP}:${serverPort}`);
@@ -63,20 +67,20 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
   const setServerData = () => {
     if (!server) return;
     setServerName(server.name);
-    let connectionSplit = server.connection.split(':');
+    let connectionSplit = server.url.split(":");
     if (connectionSplit.length === 2) {
       setIdx(0);
-      setServerURL(server.connection);
+      setServerURL(server.url);
     }
 
     if (connectionSplit.length > 2) {
       setIdx(1);
       setServerProtocol(connectionSplit[0] as any);
       setServerIP(
-        connectionSplit[1].split('/').filter((x) => x.trim().length !== 0)[0]
+        connectionSplit[1].split("/").filter((x) => x.trim().length !== 0)[0]
       );
       setServerPort(
-        connectionSplit[2].split('/').filter((x) => x.trim().length !== 0)[0]
+        connectionSplit[2].split("/").filter((x) => x.trim().length !== 0)[0]
       );
     }
   };
@@ -86,26 +90,26 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
   const onClose = () => {
     setLoading(false);
     if (!server) {
-      setConnection('');
-      setServerName('');
+      setConnection("");
+      setServerName("");
       setIdx(0);
-      setServerURL('');
-      setServerIP('');
-      setServerPort('');
-      setServerProtocol('http');
+      setServerURL("");
+      setServerIP("");
+      setServerPort("");
+      setServerProtocol("http");
     } else {
       setServerData();
     }
     closeModal();
   };
 
-  const addServerHandler = () => {
+  const addServerHandler = async () => {
     // check if connection is a valid URL or not
     if (!validURl.isUri(connection)) {
       showToast({
-        title: 'Invalid data',
-        description: 'Please enter a valid data',
-        status: 'error',
+        title: "Invalid data",
+        description: "Please enter a valid data",
+        status: "error",
       });
       return;
     }
@@ -123,30 +127,20 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
           name: serverName,
         };
 
-    invoke(server ? 'update_server' : 'add_server', data)
-      .then((id: any) => {
-        showToast({
-          title: server
-            ? 'Edited server details successfully'
-            : 'Added server successfully',
-          status: 'info',
-        });
-        onClose();
-        loadServers(id);
-        setPath('/');
-      })
-      .catch((err) => {
-        showToast({
-          title: server
-            ? 'Failed to edit server details'
-            : 'Failed to add server',
-          description: err,
-          status: 'error',
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if (server) {
+      await updateDestination(data.id || 0, data.name, data.connection);
+    } else {
+      await createDestination(serverName, connection);
+      setSelectedServer((await getDestinationByName(serverName)).data);
+    }
+    showToast({
+      title: server
+        ? "Edited server details successfully"
+        : "Added server successfully",
+      status: "info",
+    });
+    setLoading(false);
+    setPath("/");
   };
 
   return (
@@ -159,20 +153,20 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
         closeOnOverlayClick={false}
       >
         <ModalOverlay />
-        <ModalContent className='bg-app-dark3'>
-          <ModalHeader>{server ? 'Edit server' : 'Add server'}</ModalHeader>
+        <ModalContent className="bg-app-dark3">
+          <ModalHeader>{server ? "Edit server" : "Add server"}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Input
-              variant='filled'
-              placeholder='Server name'
+              variant="filled"
+              placeholder="Server name"
               value={serverName}
               onChange={(e) => setServerName(e.target.value)}
             />
             <Tabs
               mt={5}
-              variant='soft-rounded'
-              colorScheme='blue'
+              variant="soft-rounded"
+              colorScheme="blue"
               onChange={setIdx}
               index={idx}
             >
@@ -183,32 +177,32 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
               <TabPanels mt={5}>
                 <TabPanel p={0}>
                   <Input
-                    variant='filled'
-                    placeholder='Server URL'
+                    variant="filled"
+                    placeholder="Server URL"
                     value={serverURL}
                     onChange={(e) => setServerURL(e.target.value)}
                   />
                 </TabPanel>
                 <TabPanel p={0}>
-                  <Flex alignItems='center'>
+                  <Flex alignItems="center">
                     <Select
-                      variant='filled'
+                      variant="filled"
                       value={serverProtocol}
                       onChange={(e: any) => setServerProtocol(e.target.value)}
                     >
-                      <option value='http'>http</option>
-                      <option value='https'>https</option>
+                      <option value="http">http</option>
+                      <option value="https">https</option>
                     </Select>
                     <Input
-                      variant='filled'
-                      placeholder='Server IP'
+                      variant="filled"
+                      placeholder="Server IP"
                       value={serverIP}
                       onChange={(e) => setServerIP(e.target.value)}
                       mx={2}
                     />
                     <Input
-                      variant='filled'
-                      placeholder='Port'
+                      variant="filled"
+                      placeholder="Port"
                       value={serverPort}
                       onChange={(e) => setServerPort(e.target.value)}
                     />
@@ -220,7 +214,7 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
           <ModalFooter>
             <Button
               disabled={loading}
-              variant='outline'
+              variant="outline"
               mr={2}
               onClick={onClose}
             >
@@ -234,9 +228,9 @@ export const ServerForm: ReactComponent<Props> = ({ server, children }) => {
               }
               isLoading={loading}
               onClick={addServerHandler}
-              className='bg-app-accent transition-all duration-200 hover:bg-app-accent/80'
+              className="bg-app-accent transition-all duration-200 hover:bg-app-accent/80"
             >
-              {server ? 'Edit server' : 'Add server'}
+              {server ? "Edit server" : "Add server"}
             </Button>
           </ModalFooter>
         </ModalContent>

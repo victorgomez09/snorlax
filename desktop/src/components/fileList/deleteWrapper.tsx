@@ -1,11 +1,11 @@
-import { FileType } from '@/types/file.type';
-import { ReactComponent } from '@/types/react.type';
-import { useServerStore } from '@/store/server.store';
-import { useFilePageStore } from '@/store/filepage.store';
-import { deleteFile } from '@/api/file.api';
-import { useFilesStore } from '@/store/files.store';
-import { showToast } from '@/utils/showToast';
-import { PermissionWrapper } from '../permissionWrapper';
+import { FileType } from "@/types/file.type";
+import { ReactComponent } from "@/types/react.type";
+import { useServerStore } from "@/store/server.store";
+import { useFilePageStore } from "@/store/filepage.store";
+import { deleteFile } from "@/api/file.api";
+import { useFilesStore } from "@/store/files.store";
+import { showToast } from "@/utils/showToast";
+import { PermissionWrapper } from "../permissionWrapper";
 
 interface Props {
   selectedFile: FileType;
@@ -24,12 +24,12 @@ export const DeleteWrapper: ReactComponent<Props> = ({
   const deleteFileHandler = () => {
     if (!selectedServer || !selectedFile) return;
 
-    deleteFile(selectedServer?.connection, path, selectedFile?.name)
+    deleteFile(selectedServer?.url, path, selectedFile?.name)
       .then(() => {
         deleteFileFromStore(selectedFile);
         showToast({
-          title: 'Deleted file successfully',
-          status: 'success',
+          title: "Deleted file successfully",
+          status: "success",
         });
 
         if (afterDelete) {
@@ -38,10 +38,10 @@ export const DeleteWrapper: ReactComponent<Props> = ({
       })
       .catch((err) => {
         showToast({
-          title: 'Failed to delete file',
+          title: "Failed to delete file",
           description: err?.response?.data?.message || err?.message,
           duration: 5000,
-          status: 'error',
+          status: "error",
         });
       });
   };
@@ -49,7 +49,7 @@ export const DeleteWrapper: ReactComponent<Props> = ({
   return (
     <PermissionWrapper
       description="Are you sure you want to delete this file ? This action can't be undone."
-      placeholder={`Delete ${selectedFile.isDir ? 'folder' : 'file'}`}
+      placeholder={`Delete ${selectedFile.isDir ? "folder" : "file"}`}
       onClick={deleteFileHandler}
     >
       {children}
